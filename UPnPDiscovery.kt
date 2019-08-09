@@ -3,15 +3,22 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
+data class UPnPDevice(val address: String, val port: Int) {
+  fun buildAddress(): String {
+    return "$address:$port"
+  }
+}
+
 sealed class UPnPDetectorResult {
-  data class Success(val addresses: HashSet<String>) : UPnPDetectorResult()
+  data class Success(val addresses: HashSet<UPnPDevice>) : UPnPDetectorResult()
+  object NoResults : UPnPDetectorResult()
   data class FatalError(val exception: Exception) : UPnPDetectorResult()
 }
 
 class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900, val scanDuration: Int = 1000) {
 
   fun detect(): UPnPDetectorResult {
-    val addresses = HashSet<String>()
+    val addresses = HashSet<UPnPDevice>()
 
     var socket: DatagramSocket? = null
 
@@ -28,7 +35,7 @@ class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900, 
       socket = DatagramSocket(port).apply {
         reuseAddress = true
       }
-      
+
       val time = System.currentTimeMillis()
       var curTime = System.currentTimeMillis()
 
@@ -42,7 +49,7 @@ class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900, 
 
         val protocol = String(packet.data, 0, packet.length)
         if (protocol.toUpperCase() == "HTTP/1.1 200") {
-          addresses.add(packet.address.hostAddress)
+          addresses.add(UPnPDevice(packet.address.hostAddress, packet.port))
         }
 
         curTime = System.currentTimeMillis()
@@ -55,6 +62,10 @@ class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900, 
       socket?.close()
     }
 
-    return UPnPDetectorResult.Success(addresses)
+    return if (addresses.isEmpty()) {
+      UPnPDetectorResult.NoResults
+    } else {
+      UPnPDetectorResult.Success(addresses)
+    }
   }
 }
