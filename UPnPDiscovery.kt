@@ -1,6 +1,6 @@
-sealed class UPnPDetectorResult {
-  data class Success(val addresses: HashSet<String>) : UPnPDetectorResult()
-  data class FatalError(val exception: Exception) : UPnPDetectorResult()
+sealed class UPnPDiscoveryResult {
+  data class Success(val addresses: HashSet<String>) : UPnPDiscoveryResult()
+  data class FatalError(val exception: Exception) : UPnPDiscoveryResult()
 }
 
 class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900) {
@@ -38,11 +38,11 @@ class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900) 
 
     } catch (exception: Exception) {
       Timber.e(exception)
-      return UPnPDetectorResult.FatalError(exception)
+      return UPnPDiscoveryResult.FatalError(exception)
     } finally {
       socket?.close()
     }
 
-    return UPnPDetectorResult.Success(addresses)
+    return UPnPDiscoveryResult.Success(addresses)
   }
 }
