@@ -5,7 +5,7 @@ sealed class UPnPDiscoveryResult {
 
 class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900) {
 
-  fun detect(): UPnPDetectorResult {
+  fun detect(): UPnPDiscoveryResult {
     val addresses = HashSet<String>()
 
     var socket: DatagramSocket? = null
