@@ -7,7 +7,7 @@ I legit don't know what I am doing but this works. Based off https://github.com/
 ```
 doAsync {
   try {
-    val detector = UPnPDetector()
+    val detector = UPnPDiscovery()
     val result = detector.detect()
   } catch (exception: Exception) {
     Timber.e(exception)
