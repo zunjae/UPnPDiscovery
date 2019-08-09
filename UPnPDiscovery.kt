@@ -16,7 +16,6 @@ class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900, 
     var socket: DatagramSocket? = null
 
     try {
-
       val group = InetAddress.getByName(host)
 
       val query = "M-SEARCH * HTTP/1.1\r\n" +
@@ -29,8 +28,7 @@ class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900, 
       socket = DatagramSocket(port).apply {
         reuseAddress = true
       }
-
-
+      
       val time = System.currentTimeMillis()
       var curTime = System.currentTimeMillis()
 
