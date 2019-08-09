@@ -6,6 +6,7 @@ I legit don't know what I am doing but this works. Based off https://github.com/
 
 ```kotlin
 val detector = UPnPDiscovery()
+
 when (val result = detector.detect()) {
   is UPnPDetectorResult.Success -> {
     result.addresses
