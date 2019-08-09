@@ -1,11 +1,16 @@
-sealed class UPnPDiscoveryResult {
-  data class Success(val addresses: HashSet<String>) : UPnPDiscoveryResult()
-  data class FatalError(val exception: Exception) : UPnPDiscoveryResult()
+import timber.log.Timber
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.InetAddress
+
+sealed class UPnPDetectorResult {
+  data class Success(val addresses: HashSet<String>) : UPnPDetectorResult()
+  data class FatalError(val exception: Exception) : UPnPDetectorResult()
 }
 
-class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900) {
+class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900, val scanDuration: Int = 1000) {
 
-  fun detect(): UPnPDiscoveryResult {
+  fun detect(): UPnPDetectorResult {
     val addresses = HashSet<String>()
 
     var socket: DatagramSocket? = null
@@ -25,24 +30,33 @@ class UPnPDiscovery(val host: String = "239.255.255.250", val port: Int = 1900) 
         reuseAddress = true
       }
 
-      val dataGramPacket = DatagramPacket(query.toByteArray(), query.length, group, port)
-      socket.send(dataGramPacket)
 
-      val packet = DatagramPacket(ByteArray(12), 12)
-      socket.receive(packet)
+      val time = System.currentTimeMillis()
+      var curTime = System.currentTimeMillis()
 
-      val protocol = String(packet.data, 0, packet.length)
-      if (protocol.toUpperCase() == "HTTP/1.1 200") {
-        addresses.add(packet.address.hostAddress)
+      while (curTime - time < scanDuration) {
+
+        val dataGramPacket = DatagramPacket(query.toByteArray(), query.length, group, port)
+        socket.send(dataGramPacket)
+
+        val packet = DatagramPacket(ByteArray(12), 12)
+        socket.receive(packet)
+
+        val protocol = String(packet.data, 0, packet.length)
+        if (protocol.toUpperCase() == "HTTP/1.1 200") {
+          addresses.add(packet.address.hostAddress)
+        }
+
+        curTime = System.currentTimeMillis()
       }
 
     } catch (exception: Exception) {
       Timber.e(exception)
-      return UPnPDiscoveryResult.FatalError(exception)
+      return UPnPDetectorResult.FatalError(exception)
     } finally {
       socket?.close()
     }
 
-    return UPnPDiscoveryResult.Success(addresses)
+    return UPnPDetectorResult.Success(addresses)
   }
 }
