@@ -5,9 +5,16 @@ I legit don't know what I am doing but this works. Based off https://github.com/
 ## Usage
 
 ```
-doAsync {
-  val detector = UPnPDiscovery()
-  val result = detector.detect()
+when (val result = detector.detect()) {
+  is UPnPDetectorResult.Success -> {
+    result.addresses
+  }
+  is UPnPDetectorResult.NoResults -> {
+    print("No results found")
+  }
+  is UPnPDetectorResult.FatalError -> {
+    print("Exception: ${result.exception.message}")
+  }
 }
 ```
 
