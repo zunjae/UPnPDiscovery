@@ -22,4 +22,4 @@ when (val result = detector.detect()) {
 
 ## License
 
-There's no license associated with this project. You may copy the code and modify it to your heart's content. You may not send me questions regarding this project. You're on your own.
+This library is available under the MIT license, though there is no need to include a license and copyright notice
